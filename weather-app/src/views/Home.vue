@@ -1,19 +1,20 @@
 <template>
-  <section id="weatherForm">
-    <weather-form @city-name="handleSearch"></weather-form>
-  </section>
-  <!-- <section id="currentWeather">
-    <current-weather
-      v-if="weatherData.length > 0"
-      :currentWeatherData="weatherData"
-    ></current-weather>
-  </section>
-  <section id="weatherForecast">
-    <weather-details
-      v-if="moreDetailsData.length > 0"
-      :forecastData="moreDetailsData"
-    ></weather-details>
-  </section> -->
+  <div v-if="isLoading">
+    <base-loader></base-loader>
+  </div>
+  <div v-else>
+    <img src="../assets/icons/1530388_weather_christmas_snow_snowflake_winter_icon.svg" alt="" />
+    <section id="weatherForm">
+      <weather-form @city-name="handleSearch"></weather-form>
+    </section>
+    <section id="currentWeather">
+      <p v-if="error">{{ errorMessage }}</p>
+      <current-weather v-else :currentWeatherData="weatherData"></current-weather>
+    </section>
+    <section id="weatherForecast" v-if="weatherData && weatherData.length > 0">
+      <weather-details :forecastData="moreDetailsData"></weather-details>
+    </section>
+  </div>
 </template>
 
 <script>
@@ -32,7 +33,11 @@ export default {
   setup() {
     const weatherData = ref([])
     const moreDetailsData = ref([])
+    const error = ref(false)
+    const errorMessage = ref('')
+    const isLoading = ref(true)
 
+    // Function to transform the forecast data to display unique days
     const transformData = (forecastData) => {
       const transformedForecastData = forecastData.list.map((data) => {
         const data_obj = new Date(data.dt * 1000)
@@ -55,50 +60,83 @@ export default {
       return uniqueForecastData
     }
 
+    const handleError = (message) => {
+      moreDetailsData.value = []
+      error.value = true
+      errorMessage.value = message
+      isLoading.value = false
+    }
+
+    // Function to fetch the forecast data for a given city
     const fetchForecastData = async (cityName) => {
-      const forecastData = await useApi(URL, URL_KEY, null, null, null, cityName)
-      if (forecastData) {
-        const uniqueForecastData = transformData(forecastData)
-        moreDetailsData.value = uniqueForecastData
-      } else {
-        moreDetailsData.value = []
+      try {
+        const forecastData = await useApi(URL, URL_KEY, null, null, null, cityName)
+        if (forecastData) {
+          moreDetailsData.value = transformData(forecastData)
+          error.value = false
+        } else {
+          handleError('The place that you entered does not exist')
+        }
+      } catch (err) {
+        handleError('Failed to fetch forecast data')
+      } finally {
+        isLoading.value = false
       }
     }
+
+    // Function to fetch the current weather data based on user's position
     const fetchData = async () => {
       try {
         const position = await fetchCurrentPosition()
         const { latitude, longitude } = position.coords
-        const crWeatherData = await useApi(URL, URL_KEY, null, latitude, longitude, null)
-        if (crWeatherData) {
-          weatherData.value = [crWeatherData]
-          const cityName = crWeatherData.name
-          await fetchForecastData(cityName)
+        const currentWeatherData = await useApi(URL, URL_KEY, null, latitude, longitude, null)
+
+        weatherData.value = []
+
+        if (currentWeatherData) {
+          weatherData.value = [currentWeatherData]
+          await fetchForecastData(currentWeatherData.name)
         } else {
-          weatherData.value = []
+          handleError('The place that you entered does not exist')
         }
       } catch (error) {
-        console.log(error, 'error')
+        handleError('Failed to fetch weather data')
+      } finally {
+        isLoading.value = false
       }
     }
 
+    // Function to handle search input and fetch weather data for the entered city
     const handleSearch = async (formData) => {
       try {
         const responseData = await useApi(URL, URL_KEY, formData.city, null, null)
+        weatherData.value = []
         if (responseData) {
           weatherData.value = [responseData]
-          moreDetailsData.value = []
-          await fetchForecastData(formData.city) // Ensure this is awaited
+          await fetchForecastData(formData.city)
         } else {
-          weatherData.value = [] // Clear data on error
+          handleError('The place that you entered does not exist')
         }
-        console.log(weatherData.value, 'search data')
       } catch (error) {
-        console.log(error, 'error')
+        handleError('Failed to fetch weather data for the entered city')
+      } finally {
+        isLoading.value = false
       }
     }
 
     onMounted(fetchData)
-    return { weatherData, handleSearch, moreDetailsData }
+    return { weatherData, handleSearch, moreDetailsData, error, errorMessage, isLoading }
   }
 }
 </script>
+
+<style scoped>
+img {
+  width: 70px;
+  height: 70px;
+}
+p {
+  text-align: center;
+  color: white;
+}
+</style>
