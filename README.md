@@ -1,0 +1,1 @@
+The Weather App is a web application built with Vue.js that allows users to search for weather information of different locations using the OpenWeather API. It provides current weather data as well as a 5-day weather forecast for the searched location.
