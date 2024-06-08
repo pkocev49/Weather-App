@@ -17,6 +17,8 @@ Technologies Used:
 
 -Vue.js: Frontend framework for building the user interface.
 
+-Vuetify
+
 -OpenWeather API: Used to fetch weather data for the searched locations.
 
 DEMO:https://weather-app-api-vue.netlify.app/
