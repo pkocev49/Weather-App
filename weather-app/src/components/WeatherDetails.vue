@@ -77,7 +77,7 @@ export default {
   },
   setup(props) {
     const { forecastData } = toRefs(props)
-    console.log(forecastData.value, 'data from more details')
+
     const isOpen = ref(new Array(props.forecastData.length).fill(false))
     const showMore = ref(false)
     const toggleIsOpen = (index) => {

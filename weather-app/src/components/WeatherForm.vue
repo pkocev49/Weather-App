@@ -36,6 +36,7 @@ export default {
   border: 1px solid gray;
   width: 100%;
   margin-right: 10px;
+  color: white;
 }
 .weatherForm button {
   background-color: transparent;

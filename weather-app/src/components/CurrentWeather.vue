@@ -39,13 +39,7 @@ export default {
   },
   setup(props) {
     const { currentWeatherData } = toRefs(props)
-    watch(
-      currentWeatherData,
-      (newValue) => {
-        console.log(newValue, 'current weather data')
-      },
-      { immediate: true }
-    )
+
     const weatherIconUrl = computed(() => {
       if (currentWeatherData.value.length > 0) {
         return `https://openweathermap.org/img/wn/${currentWeatherData.value[0].weather[0].icon}.png`
