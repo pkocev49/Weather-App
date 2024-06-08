@@ -8,7 +8,8 @@ Features:
 -Current Weather: Displays the current weather conditions, including temperature, humidity, wind speed, and weather description.
 
 -5-Day Forecast: Provides a 5-day weather forecast with detailed daily weather information.
-Responsive Design: The app is designed to be responsive and works well on both desktop and mobile devices.
+
+-Responsive Design: The app is designed to be responsive and works well on both desktop and mobile devices.
 
 Technologies Used:
 
